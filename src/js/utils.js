@@ -1,58 +1,42 @@
-// main.js
 
-import { loadPartial } from './utils.js';
 
-// Fix accidental duplicated /pages/pages/ URLs
-if (window.location.pathname.includes('/pages/pages/')) {
-  const corrected = window.location.pathname.replace('/pages/pages/', '/pages/');
-  window.location.replace(corrected);
-}
 
-// Determine base path for partials depending on page depth
-const basePath = window.location.pathname.includes('/pages/') ? '../' : '';
+export async function loadPartial(id, filePath, callback) {
+  try {
+    const response = await fetch(filePath);
+    const content = await response.text();
 
-// Load header and footer dynamically
-loadPartial('header', `${basePath}partials/header.html`, initHeader);
-loadPartial('footer', `${basePath}partials/footer.html`);
+    document.querySelector(id).innerHTML = content;
 
-// Function to initialize header after it's loaded
-function initHeader() {
-  setupHamburger();
-  updateLogoPath();
-}
-
-// Hamburger menu toggle
-function setupHamburger() {
-  const menuBtn = document.getElementById('menu');
-  const navList = document.querySelector('.navigation');
-
-  if (menuBtn && navList) {
-    menuBtn.addEventListener('click', () => {
-      menuBtn.classList.toggle('show');
-      navList.classList.toggle('show');
-    });
+    if (callback) callback(); // ← Run hamburger setup AFTER load
+  } catch (error) {
+    console.error(`Failed to load partial: ${filePath}`, error);
   }
 }
 
-// Update logo path based on page depth
-function updateLogoPath() {
-  const isInsidePages = window.location.pathname.includes('/pages/');
-  const logo = document.querySelector('header img.logo');
 
-  if (logo) {
-    logo.src = isInsidePages
-      ? '../assets/images/logo.png'
-      : 'assets/images/logo.png';
-  }
-}
+// export async function loadPartial(selector, url) {
+//   try {
+//     const container = document.querySelector(selector);
 
-// DOMContentLoaded actions
-document.addEventListener('DOMContentLoaded', () => {
-  // Update current year dynamically
-  const yearSpan = document.getElementById('currentYear');
-  if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+//     if (!container) {
+//       console.warn(`loadPartial(): Element "${selector}" not found in DOM.`);
+//       return;
+//     }
 
-  // Update last modified date
-  const lastModified = document.getElementById('lastModifiedDate');
-  if (lastModified) lastModified.textContent = `Last Modified: ${document.lastModified}`;
-});
+//     const response = await fetch(url);
+    
+//     if (!response.ok) {
+//       console.error(` ERROR loading partial "${url}". Server responded with:`, response.status);
+//       return;
+//     }
+
+//     const html = await response.text();
+//     container.innerHTML = html;
+
+//   } catch (err) {
+//     console.error(` Failed to load partial "${url}":`, err);
+//   }
+// }
+
+
